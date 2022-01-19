@@ -9,25 +9,25 @@ mod tests {
 
 static DEBUG: bool = true;
 
-
 pub mod apt_packages {
     use std::process::Command;
-    use yaml_rust::{Yaml};
-
-    
+    use yaml_rust::Yaml;
 
     pub fn install_packages(packages: &Yaml) {
-
         let utilities_list = packages["utilities"].as_vec().unwrap();
-        let utilities_list = utilities_list.iter().map(|x| x.as_str().unwrap()).collect::<Vec<&str>>();
+        let utilities_list = utilities_list
+            .iter()
+            .map(|x| x.as_str().unwrap())
+            .collect::<Vec<&str>>();
 
         let standard_list = packages["standard"].as_vec().unwrap();
-        let standard_list = standard_list.iter().map(|x| x.as_str().unwrap()).collect::<Vec<&str>>();
+        let standard_list = standard_list
+            .iter()
+            .map(|x| x.as_str().unwrap())
+            .collect::<Vec<&str>>();
 
         install_utilities(utilities_list);
         install_standard(standard_list);
-
-
     }
     fn install_utilities(utilities: Vec<&str>) {
         if crate::DEBUG {
@@ -39,12 +39,10 @@ pub mod apt_packages {
             .args(utilities)
             .output()
             .expect("failed to execute process");
-        
         if crate::DEBUG {
             println!("{}", String::from_utf8_lossy(&output.stderr));
             println!("{}", String::from_utf8_lossy(&output.stdout));
         }
-
     }
     fn install_standard(standard: Vec<&str>) {
         if crate::DEBUG {
@@ -56,7 +54,6 @@ pub mod apt_packages {
             .args(standard)
             .output()
             .expect("failed to execute process");
-        
         if crate::DEBUG {
             println!("{}", String::from_utf8_lossy(&output.stderr));
             println!("{}", String::from_utf8_lossy(&output.stdout));
@@ -66,20 +63,20 @@ pub mod apt_packages {
 
 pub mod snap_packages {
     use std::process::Command;
-    use yaml_rust::{Yaml};
+    use yaml_rust::Yaml;
     // use std::env;
 
-
     pub fn install_packages(packages: &Yaml) {
-
         let packages_list = packages.as_vec().unwrap();
-        let packages_list = packages_list.iter().map(|x| x.as_str().unwrap()).collect::<Vec<&str>>();
+        let packages_list = packages_list
+            .iter()
+            .map(|x| x.as_str().unwrap())
+            .collect::<Vec<&str>>();
 
         install(packages_list);
     }
 
     fn install(packages: Vec<&str>) {
-
         if crate::DEBUG {
             println!("{:?}", packages);
         }
@@ -89,10 +86,32 @@ pub mod snap_packages {
             .args(packages)
             .output()
             .expect("failed to execute process");
-        
         if crate::DEBUG {
             println!("{}", String::from_utf8_lossy(&output.stderr));
             println!("{}", String::from_utf8_lossy(&output.stdout));
         }
     }
 }
+
+pub mod apply {
+    use yaml_rust::Yaml;
+
+    pub fn install(yaml: &Yaml) {
+        for (service, packages) in yaml["packages"].as_hash().unwrap().iter() {
+            let service = service.as_str().unwrap();
+            match service {
+                "apt" => {
+                    crate::apt_packages::install_packages(packages);
+                }
+                "snap" => {
+                    crate::snap_packages::install_packages(packages);
+                }
+                _ => {
+                    println!("{}", service);
+                }
+            }
+        }
+    }
+}
+
+pub mod capture {}
