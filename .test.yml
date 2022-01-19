@@ -6,7 +6,8 @@ packages:
     utilities:
     - wget
     - curl
-    standard_packages:
+    - snapd
+    standard:
     - timeshift
   snap:
     - golang
