@@ -3,10 +3,13 @@
 ---
 packages:
   apt:
+    repositories:
+    - # TODO
     utilities:
     - wget
     - curl
     - snapd
+    - software-properties-common
     standard:
     - timeshift
   snap:
