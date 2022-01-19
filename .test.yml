@@ -1,0 +1,17 @@
+# test yaml for rinstall
+
+---
+packages:
+  apt:
+    utilities:
+    - wget
+    - curl
+    standard_packages:
+    - timeshift
+  snap:
+    - golang
+  custom:
+    command: go install
+    packages:
+    - github.com/yadayad/thing.git
+    
