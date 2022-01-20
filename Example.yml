@@ -1,0 +1,57 @@
+# Example Yaml file for all package managers
+---
+managers:
+  apt:
+    repositories:
+      - ppa:<repository-name>
+      - deb http://us.archive.ubuntu.com/ubuntu/ saucy universe multiverse
+    utilities:
+      - wget
+      - curl
+      - snapd
+      - software-properties-common
+    packages:
+      - timeshift
+  snap:
+    repositories:
+    utilities:
+    packages:
+      classic:
+        - go
+      
+  rpm:
+    repositories:
+    utilities:
+    packages:
+
+  dnf:
+    repositories:
+    utilities:
+    packages:
+
+  yum:
+    repositories:
+    utilities:
+    packages:
+
+  pacman:
+    repositories:
+    utilities:
+    packages:
+
+  cargo:
+    packages:
+
+  go:
+    packages:
+      - github.com/kubicorn/kubicorn
+
+
+
+  custom:
+    install_rust:
+      command: curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+    install_kubicorn:
+      command: go install
+
+    
