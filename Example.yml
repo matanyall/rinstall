@@ -3,8 +3,7 @@
 managers:
   apt:
     repositories:
-      - ppa:<repository-name>
-      - deb http://us.archive.ubuntu.com/ubuntu/ saucy universe multiverse
+      # - deb [ arch=amd64,arm64 ] https://repo.mongodb.org/apt/ubuntu focal/mongodb-org/5.0 multiverse
     utilities:
       - wget
       - curl
@@ -13,11 +12,11 @@ managers:
     packages:
       - timeshift
   snap:
-    repositories:
-    utilities:
     packages:
       classic:
         - go
+      strict:
+      devmode:
       
   rpm:
     repositories:
