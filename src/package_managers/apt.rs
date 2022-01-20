@@ -1,55 +1,132 @@
-
-pub use self::apt::install_packages;
-
+pub use self::apt::install;
 
 mod apt {
     use std::process::Command;
     use yaml_rust::Yaml;
 
-    pub fn install_packages(packages: &Yaml) {
-        let utilities_list = packages["utilities"].as_vec().unwrap();
-        let utilities_list = utilities_list
-            .iter()
-            .map(|x| x.as_str().unwrap())
-            .collect::<Vec<&str>>();
+    pub fn install(modules: &Yaml) {
+        let repository_list = match modules["repositories"].as_vec() {
+            Some(x) => x.iter().map(|x| x.as_str().unwrap()).collect::<Vec<&str>>(),
+            None => vec![],
+        };
 
-        let standard_list = packages["standard"].as_vec().unwrap();
-        let standard_list = standard_list
-            .iter()
-            .map(|x| x.as_str().unwrap())
-            .collect::<Vec<&str>>();
+        let utilities_list = match modules["utilities"].as_vec() {
+            Some(x) => x.iter().map(|x| x.as_str().unwrap()).collect::<Vec<&str>>(),
+            None => vec![],
+        };
 
+        let package_list = match modules["packages"].as_vec() {
+            Some(x) => x.iter().map(|x| x.as_str().unwrap()).collect::<Vec<&str>>(),
+            None => vec![],
+        };
+        install_repositories(repository_list);
         install_utilities(utilities_list);
-        install_standard(standard_list);
+        install_packages(package_list);
     }
-    fn install_utilities(utilities: Vec<&str>) {
+
+    fn install_repositories(repository_list: Vec<&str>) {
         if crate::DEBUG {
-            println!("{:?}", utilities);
+            println!("{:?}", repository_list);
         }
-        let output = Command::new("apt")
-            .arg("install")
-            .arg("--dry-run")
-            .args(utilities)
-            .output()
-            .expect("failed to execute process");
-        if crate::DEBUG {
-            println!("{}", String::from_utf8_lossy(&output.stderr));
-            println!("{}", String::from_utf8_lossy(&output.stdout));
+        if repository_list.len() > 0 {
+            for repository in repository_list {
+                if crate::DRY_RUN {
+                    println!("apt-add-repository {}", repository);
+                } else {
+                    let output = Command::new("apt-add-repository")
+                        .arg("-y")
+                        .arg(repository)
+                        .output()
+                        .expect("failed to execute process");
+                    if crate::DEBUG {
+                        println!("{}", String::from_utf8_lossy(&output.stderr));
+                        println!("{}", String::from_utf8_lossy(&output.stdout));
+                    }
+                }
+            }
+
+            apt_update();
         }
     }
-    fn install_standard(standard: Vec<&str>) {
+
+    fn install_packages(package_list: Vec<&str>) {
         if crate::DEBUG {
-            println!("{:?}", standard);
+            println!("{:?}", package_list);
         }
-        let output = Command::new("apt")
-            .arg("install")
-            .arg("--dry-run")
-            .args(standard)
-            .output()
-            .expect("failed to execute process");
+        if package_list.len() > 0 {
+            if crate::DRY_RUN {
+                let output = Command::new("apt")
+                    .arg("install")
+                    .arg("-y")
+                    .arg("--dry-run")
+                    .args(package_list)
+                    .output()
+                    .expect("failed to execute process");
+                if crate::DEBUG {
+                    println!("{}", String::from_utf8_lossy(&output.stderr));
+                    println!("{}", String::from_utf8_lossy(&output.stdout));
+                }
+            } else {
+                let output = Command::new("apt")
+                    .arg("install")
+                    .arg("-y")
+                    .args(package_list)
+                    .output()
+                    .expect("failed to execute process");
+                if crate::DEBUG {
+                    println!("{}", String::from_utf8_lossy(&output.stderr));
+                    println!("{}", String::from_utf8_lossy(&output.stdout));
+                }
+            }
+        }
+    }
+
+    fn install_utilities(utilities_list: Vec<&str>) {
         if crate::DEBUG {
-            println!("{}", String::from_utf8_lossy(&output.stderr));
-            println!("{}", String::from_utf8_lossy(&output.stdout));
+            println!("{:?}", utilities_list);
+        }
+        if utilities_list.len() > 0 {
+            if crate::DRY_RUN {
+                let output = Command::new("apt")
+                    .arg("install")
+                    .arg("--dry-run")
+                    .arg("-y")
+                    .args(utilities_list)
+                    .output()
+                    .expect("failed to execute process");
+                if crate::DEBUG {
+                    println!("{}", String::from_utf8_lossy(&output.stderr));
+                    println!("{}", String::from_utf8_lossy(&output.stdout));
+                }            
+            } else {
+                let output = Command::new("apt")
+                    .arg("install")
+                    .arg("-y")
+                    .args(utilities_list)
+                    .output()
+                    .expect("failed to execute process");
+                if crate::DEBUG {
+                    println!("{}", String::from_utf8_lossy(&output.stderr));
+                    println!("{}", String::from_utf8_lossy(&output.stdout));
+                }
+            }
+            apt_update();
+        }
+    }
+
+    fn apt_update() {
+
+        if crate::DRY_RUN {
+            println!("apt-get update");
+        } else {
+            let output = Command::new("apt")
+                .arg("update")
+                .output()
+                .expect("failed to execute process");
+            if crate::DEBUG {
+                println!("{}", String::from_utf8_lossy(&output.stderr));
+                println!("{}", String::from_utf8_lossy(&output.stdout));
+            }
         }
     }
 }
