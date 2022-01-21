@@ -1,8 +1,10 @@
-pub use self::apt::install;
+pub use self::apt::{install, capture};
 
 mod apt {
     use std::process::Command;
-    use yaml_rust::Yaml;
+    use yaml_rust::{Yaml};
+    // use std::collections::HashMap;
+    use std::collections::BTreeMap;
 
     pub fn install(modules: &Yaml) {
         let repository_list = match modules["repositories"].as_vec() {
@@ -128,5 +130,55 @@ mod apt {
                 println!("{}", String::from_utf8_lossy(&output.stdout));
             }
         }
+    }
+
+    pub fn capture() -> BTreeMap<String, Vec<String>> {
+        
+        let mut output_map = BTreeMap::new();
+
+        output_map.insert("repositories".to_string(), capture_repositories());
+
+        output_map.insert("utilities".to_string(), capture_utilities());
+
+        output_map.insert("packages".to_string(), capture_packages());
+
+        output_map
+
+    }
+    // TODO: make repo capture
+    #[allow(unused_mut)]
+    fn capture_repositories() -> Vec<String> {
+
+        let mut repo_list = vec![];
+
+        repo_list
+
+    }
+
+    #[allow(unused_mut)]
+    fn capture_utilities() -> Vec<String> {
+
+        let mut utility_list = vec![];
+
+        utility_list
+
+
+    }
+
+    fn capture_packages() -> Vec<String> {
+        let output = Command::new("apt-mark")
+            .arg("showmanual")
+            .output()
+            .expect("failed to execute process");
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        let packages = stdout.split("\n");
+        let mut package_list = vec![];
+        for package in packages {
+            if package.len() > 0 {
+                package_list.push(package.to_string());
+            }
+        }
+        package_list
+
     }
 }
