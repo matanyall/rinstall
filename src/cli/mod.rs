@@ -40,6 +40,15 @@ mod cli {
                         .required(true)
                         .help("Capture your system configuration")
                         .index(1),
+                )
+                .arg(Arg::new("MANAGER")
+                    .long("manager")
+                    .short('m')
+                    .takes_value(true)
+                    .default_missing_value("all")
+                    .required(false)
+                    .multiple_values(true)
+                    .help("The package manager to capture")
                 );
 
             let m = m.subcommand(apply);
