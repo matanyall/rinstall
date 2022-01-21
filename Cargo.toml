@@ -8,3 +8,6 @@ edition = "2021"
 [dependencies]
 yaml-rust = "0.4.0"
 clap = "3.0.0"
+linked-hash-map = "0.5.4"
+serde = "1.0"
+serde_yaml = "0.8"

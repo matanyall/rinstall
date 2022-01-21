@@ -2,9 +2,9 @@ use std::fs::File;
 use std::io::prelude::*;
 
 extern crate yaml_rust;
-use yaml_rust::{Yaml, YamlLoader};
+use yaml_rust::{Yaml, YamlLoader, YamlEmitter};
 
-use rinstall::apply;
+use rinstall::{apply, capture};
 
 mod cli;
 
@@ -20,6 +20,11 @@ fn main() {
         }
         Some(("capture", matches)) => {
             // TODO: capture
+            let output_file = matches.value_of("OUTPUT").unwrap();
+            let output_file = String::from(output_file);
+            let managers = matches.values_of("MANAGER").unwrap_or(clap::Values::default()).collect::<Vec<&str>>();
+            capture::capture(output_file, managers);
+
         }
         _ => {}
     }
