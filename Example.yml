@@ -12,11 +12,10 @@ managers:
     packages:
       - timeshift
   snap:
-    packages:
-      classic:
-        - go
-      strict:
-      devmode:
+    classic:
+      - go
+    strict:
+    devmode:
       
   rpm:
     repositories:

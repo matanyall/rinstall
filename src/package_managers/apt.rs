@@ -3,9 +3,8 @@ pub use self::apt::{install, capture};
 mod apt {
     use std::process::Command;
     use yaml_rust::{Yaml};
-    use yaml_rust::yaml::{Hash};
-    use std::collections::HashMap;
-    use linked_hash_map::LinkedHashMap;
+    // use std::collections::HashMap;
+    use std::collections::BTreeMap;
 
     pub fn install(modules: &Yaml) {
         let repository_list = match modules["repositories"].as_vec() {
@@ -133,7 +132,40 @@ mod apt {
         }
     }
 
-    pub fn capture() -> Vec<String> {
+    pub fn capture() -> BTreeMap<String, Vec<String>> {
+        
+        let mut output_map = BTreeMap::new();
+
+        output_map.insert("repositories".to_string(), capture_repositories());
+
+        output_map.insert("utilities".to_string(), capture_utilities());
+
+        output_map.insert("packages".to_string(), capture_packages());
+
+        output_map
+
+    }
+    // TODO: make repo capture
+    #[allow(unused_mut)]
+    fn capture_repositories() -> Vec<String> {
+
+        let mut repo_list = vec![];
+
+        repo_list
+
+    }
+
+    #[allow(unused_mut)]
+    fn capture_utilities() -> Vec<String> {
+
+        let mut utility_list = vec![];
+
+        utility_list
+
+
+    }
+
+    fn capture_packages() -> Vec<String> {
         let output = Command::new("apt-mark")
             .arg("showmanual")
             .output()
@@ -144,17 +176,9 @@ mod apt {
         for package in packages {
             if package.len() > 0 {
                 package_list.push(package.to_string());
-                println!("found: {}", package);
             }
         }
-        // let mut package_map = LinkedHashMap::<Yaml, Yaml>::new();
-        // let p_list = Yaml::Array(package_list);
-        // package_map.insert(Yaml::String("packages".to_string()), p_list);
-        // package_map.as_hash().unwrap().insert(Yaml::from_str("packages"), p_list); //Yaml::Array(package_list);
-        // for package in package_list {
-        //     package_map.push(package.to_string(), Yaml::String("manual".to_string()));
-        // }
-        // package_map
         package_list
+
     }
 }

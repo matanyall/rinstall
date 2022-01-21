@@ -2,7 +2,7 @@ use std::fs::File;
 use std::io::prelude::*;
 
 extern crate yaml_rust;
-use yaml_rust::{Yaml, YamlLoader, YamlEmitter};
+use yaml_rust::{Yaml, YamlLoader};
 
 use rinstall::{apply, capture};
 
@@ -10,6 +10,8 @@ mod cli;
 
 fn main() {
     let matches = cli::run();
+
+    // static DRY_RUN: bool = matches.is_present("dry-run"); Do thomething with lazy_static
 
     match matches.subcommand() {
         Some(("apply", matches)) => {
@@ -19,12 +21,13 @@ fn main() {
             apply::install(apply_yaml);
         }
         Some(("capture", matches)) => {
-            // TODO: capture
             let output_file = matches.value_of("OUTPUT").unwrap();
             let output_file = String::from(output_file);
-            let managers = matches.values_of("MANAGER").unwrap_or(clap::Values::default()).collect::<Vec<&str>>();
+            let managers = matches
+                .values_of("MANAGER")
+                .unwrap_or(clap::Values::default())
+                .collect::<Vec<&str>>();
             capture::capture(output_file, managers);
-
         }
         _ => {}
     }

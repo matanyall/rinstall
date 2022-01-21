@@ -7,8 +7,10 @@ mod tests {
     }
 }
 
-static DEBUG: bool = true;
+static DEBUG: bool = false;
 static DRY_RUN: bool = false;
+
+static ALL_MANAGERS: [&str; 2] = ["apt", "snap"];
 
 mod package_managers;
 use package_managers::{apt, snap};
@@ -35,41 +37,36 @@ pub mod apply {
 }
 
 pub mod capture {
-    use yaml_rust::{Yaml, YamlEmitter};
-    use linked_hash_map::LinkedHashMap;
     use serde_yaml;
-    use std::collections::HashMap;
+    use std::collections::BTreeMap;
+    use std::fs::File;
+    use std::io::prelude::*;
 
     pub fn capture(yaml_output: String, managers: Vec<&str>) {
+        let mut managers = managers;
 
-        println!("{:?}", managers);
-        println!("{:?}", yaml_output);
+        if managers.len() == 0 || managers.contains(&"all") {
+            managers = crate::ALL_MANAGERS.to_vec();
+        }
 
         let mut output_string = String::new();
         output_string.push_str(&format!("---\n"));
         output_string.push_str(&format!("managers:\n"));
-        let mut output_map = HashMap::new(); 
-        output_map.insert("managers".to_string(), HashMap::new());
-        // output_yaml.insert(Yaml::from_str("managers"), Yaml::Hash(LinkedHashMap::<Yaml, Yaml>::new()));
-
-        // {
-        //     "managers" => Yaml::Hash(linked_hash_map! {
-        //         "apt" => Yaml::Hash(linked_hash_map! {}),
-        //         "snap" => Yaml::Hash(linked_hash_map! {}),
-        //     }),
-        // };
-        for service in managers{
-            // let service = service.as_str().unwrap();
+        let mut output_map = BTreeMap::new();
+        output_map.insert("managers".to_string(), BTreeMap::new());
+        for service in managers {
             match service {
                 "apt" => {
-
-                    output_map.get_mut("managers").unwrap().insert("apt".to_string(), crate::apt::capture());
-                    // let apt_yaml = Yaml::Hash(crate::apt::capture());
-                    // output_yaml[&Yaml::from_str("managers")].as_hash().unwrap().insert(Yaml::from_str("apt"), apt_yaml);
-                    // output_string.push_str(apt_yaml);
+                    output_map
+                        .get_mut("managers")
+                        .unwrap()
+                        .insert("apt".to_string(), crate::apt::capture());
                 }
                 "snap" => {
-                    // crate::snap::install(packages);
+                    output_map
+                        .get_mut("managers")
+                        .unwrap()
+                        .insert("snap".to_string(), crate::snap::capture());
                 }
                 _ => {
                     println!("{}", service);
@@ -78,8 +75,9 @@ pub mod capture {
         }
 
         let output_string = serde_yaml::to_string(&output_map).unwrap();
-        println!("{:?}", output_string);
 
-        // let output = YamlEmitter::new(&mut output_string);
+        // write output_string to file called yaml_output
+        let mut file = File::create(yaml_output).unwrap();
+        file.write_all(output_string.as_bytes()).unwrap();
     }
 }

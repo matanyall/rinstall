@@ -1,21 +1,23 @@
+pub use self::snap::capture;
 pub use self::snap::install;
 
 mod snap {
+    use std::collections::BTreeMap;
     use std::process::Command;
     use yaml_rust::Yaml;
 
     pub fn install(modules: &Yaml) {
-        let classic_package_list = match modules["packages"]["classic"].as_vec() {
+        let classic_package_list = match modules["classic"].as_vec() {
             Some(x) => x.iter().map(|x| x.as_str().unwrap()).collect::<Vec<&str>>(),
             None => vec![],
         };
 
-        let strict_package_list = match modules["packages"]["strict"].as_vec() {
+        let strict_package_list = match modules["strict"].as_vec() {
             Some(x) => x.iter().map(|x| x.as_str().unwrap()).collect::<Vec<&str>>(),
             None => vec![],
         };
 
-        let devmode_package_list = match modules["packages"]["devmode"].as_vec() {
+        let devmode_package_list = match modules["devmode"].as_vec() {
             Some(x) => x.iter().map(|x| x.as_str().unwrap()).collect::<Vec<&str>>(),
             None => vec![],
         };
@@ -88,5 +90,105 @@ mod snap {
                 }
             }
         }
+    }
+
+    pub fn capture() -> BTreeMap<String, Vec<String>> {
+
+        let mut output_map = BTreeMap::new();
+
+        output_map.insert("classic".to_string(), capture_classic());
+
+        output_map.insert("strict".to_string(), capture_strict());
+
+        output_map.insert("devmode".to_string(), capture_devmode());
+
+        output_map
+    }
+
+    fn capture_classic() -> Vec<String> {
+        let output = Command::new("snap")
+            .arg("list")
+            .arg("--color=never")
+            .arg("--unicode=never")
+            .output()
+            .expect("failed to execute process");
+
+        let mut output_vec = Vec::new();
+        let cmd_output_string = String::from_utf8_lossy(&output.stdout);
+        let cmd_output_vec = cmd_output_string.split("\n").collect::<Vec<&str>>();
+        for line in cmd_output_vec[1..].iter() {
+            if line.contains(" ") {
+                let line_vec = line.split_ascii_whitespace().collect::<Vec<&str>>();
+                let package_name = line_vec[0];
+                let mode = line_vec[5];
+                if crate::DEBUG {
+                    println!("{:?}", line_vec);
+                    println!("package_name: {}", package_name);
+                    println!("mode: {}", mode);
+                }
+                if mode == "classic" {
+                    output_vec.push(format!("{}", package_name.to_string()));
+                }
+            }
+        }
+        output_vec
+    }
+
+    fn capture_strict() -> Vec<String> {
+        let output = Command::new("snap")
+            .arg("list")
+            .arg("--color=never")
+            .arg("--unicode=never")
+            .output()
+            .expect("failed to execute process");
+
+        let mut output_vec = Vec::new();
+        let cmd_output_string = String::from_utf8_lossy(&output.stdout);
+        let cmd_output_vec = cmd_output_string.split("\n").collect::<Vec<&str>>();
+        for line in cmd_output_vec[1..].iter() {
+            if line.contains(" ") {
+                let line_vec = line.split_ascii_whitespace().collect::<Vec<&str>>();
+                let package_name = line_vec[0];
+                let mode = line_vec[5];
+                if crate::DEBUG {
+                    println!("{:?}", line_vec);
+                    println!("package_name: {}", package_name);
+                    println!("mode: {}", mode);
+                }
+                if mode == "-" {
+                    output_vec.push(format!("{}", package_name.to_string()));
+                }
+            }
+        }
+        output_vec
+    }
+
+    fn capture_devmode() -> Vec<String> {
+        let output = Command::new("snap")
+            .arg("list")
+            .arg("--color=never")
+            .arg("--unicode=never")
+            .output()
+            .expect("failed to execute process");
+
+        let mut output_vec = Vec::new();
+        let cmd_output_string = String::from_utf8_lossy(&output.stdout);
+        let cmd_output_vec = cmd_output_string.split("\n").collect::<Vec<&str>>();
+        for line in cmd_output_vec[1..].iter() {
+            if line.contains(" ") {
+                let line_vec = line.split_ascii_whitespace().collect::<Vec<&str>>();
+                let package_name = line_vec[0];
+                let mode = line_vec[5];
+                if crate::DEBUG {
+                    println!("{:?}", line_vec);
+                    println!("package_name: {}", package_name);
+                    println!("mode: {}", mode);
+                }
+                if mode == "devmode" {
+                    output_vec.push(format!("{}", package_name.to_string()));
+                }
+            }
+        }
+        output_vec
     }
 }
