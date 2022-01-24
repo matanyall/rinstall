@@ -90,11 +90,11 @@ yum | Planned
 
 ### To-Do List
 
-- [] Repository Capturing and Applying
-- [] Testing
-- [] Documentation
-- [] Publish
-  - [] apt
-  - [] snap
-  - [] crates.io
+- [ ] Repository Capturing and Applying
+- [ ] Testing
+- [ ] Documentation
+- [ ] Publish
+  - [ ] apt
+  - [ ] snap
+  - [ ] crates.io
 
