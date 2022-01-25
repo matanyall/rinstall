@@ -3,8 +3,8 @@ pub use self::apt::{install, capture};
 mod apt {
     use std::process::Command;
     use yaml_rust::{Yaml};
-    // use std::collections::HashMap;
-    use std::collections::BTreeMap;
+    use serde_yaml::{Value};
+    use serde_yaml::mapping::{Mapping};
 
     pub fn install(modules: &Yaml) {
         let repository_list = match modules["repositories"].as_vec() {
@@ -116,6 +116,11 @@ mod apt {
         }
     }
 
+    /// apt update
+    /// 
+    /// This function will update the apt cache.
+    /// 
+    /// # Examples
     fn apt_update() {
 
         if crate::DRY_RUN {
@@ -132,40 +137,46 @@ mod apt {
         }
     }
 
-    pub fn capture() -> BTreeMap<String, Vec<String>> {
+    /// Capture the output of the command
+    /// 
+    /// # Arguments
+    /// 
+    /// 
+    /// 
+    pub fn capture() -> Value {
         
-        let mut output_map = BTreeMap::new();
+        let mut output_map = Mapping::new();
 
-        output_map.insert("repositories".to_string(), capture_repositories());
+        output_map.insert(Value::String("repositories".to_string()), capture_repositories());
 
-        output_map.insert("utilities".to_string(), capture_utilities());
+        output_map.insert(Value::String("utilities".to_string()), capture_utilities());
 
-        output_map.insert("packages".to_string(), capture_packages());
+        output_map.insert(Value::String("packages".to_string()), capture_packages());
 
-        output_map
+        Value::Mapping(output_map)
 
     }
     // TODO: make repo capture
     #[allow(unused_mut)]
-    fn capture_repositories() -> Vec<String> {
+    fn capture_repositories() -> Value {
 
         let mut repo_list = vec![];
 
-        repo_list
+        Value::Sequence(repo_list)
 
     }
 
     #[allow(unused_mut)]
-    fn capture_utilities() -> Vec<String> {
+    fn capture_utilities() -> Value {
 
         let mut utility_list = vec![];
 
-        utility_list
+        Value::Sequence(utility_list)
 
 
     }
 
-    fn capture_packages() -> Vec<String> {
+    fn capture_packages() -> Value {
         let output = Command::new("apt-mark")
             .arg("showmanual")
             .output()
@@ -175,10 +186,10 @@ mod apt {
         let mut package_list = vec![];
         for package in packages {
             if package.len() > 0 {
-                package_list.push(package.to_string());
+                package_list.push(Value::String(package.to_string()));
             }
         }
-        package_list
+        Value::Sequence(package_list)
 
     }
 }

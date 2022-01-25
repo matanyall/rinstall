@@ -2,7 +2,8 @@ pub use self::snap::capture;
 pub use self::snap::install;
 
 mod snap {
-    use std::collections::BTreeMap;
+    use serde_yaml::mapping::Mapping;
+    use serde_yaml::Value;
     use std::process::Command;
     use yaml_rust::Yaml;
 
@@ -92,20 +93,19 @@ mod snap {
         }
     }
 
-    pub fn capture() -> BTreeMap<String, Vec<String>> {
+    pub fn capture() -> Value {
+        let mut output_map = Mapping::new();
 
-        let mut output_map = BTreeMap::new();
+        output_map.insert(Value::String("classic".into()), capture_classic());
 
-        output_map.insert("classic".to_string(), capture_classic());
+        output_map.insert(Value::String("strict".into()), capture_strict());
 
-        output_map.insert("strict".to_string(), capture_strict());
-
-        output_map.insert("devmode".to_string(), capture_devmode());
-
-        output_map
+        output_map.insert(Value::String("devmode".into()), capture_devmode());
+        Value::Mapping(output_map)
     }
 
-    fn capture_classic() -> Vec<String> {
+
+    fn capture_classic() -> Value {
         let output = Command::new("snap")
             .arg("list")
             .arg("--color=never")
@@ -127,14 +127,14 @@ mod snap {
                     println!("mode: {}", mode);
                 }
                 if mode == "classic" {
-                    output_vec.push(format!("{}", package_name.to_string()));
+                    output_vec.push(Value::String(package_name.to_string()));
                 }
             }
         }
-        output_vec
+        Value::Sequence(output_vec)
     }
 
-    fn capture_strict() -> Vec<String> {
+    fn capture_strict() -> Value {
         let output = Command::new("snap")
             .arg("list")
             .arg("--color=never")
@@ -156,14 +156,14 @@ mod snap {
                     println!("mode: {}", mode);
                 }
                 if mode == "-" {
-                    output_vec.push(format!("{}", package_name.to_string()));
+                    output_vec.push(Value::String(package_name.to_string()));
                 }
             }
         }
-        output_vec
+        Value::Sequence(output_vec)
     }
 
-    fn capture_devmode() -> Vec<String> {
+    fn capture_devmode() -> Value {
         let output = Command::new("snap")
             .arg("list")
             .arg("--color=never")
@@ -185,10 +185,10 @@ mod snap {
                     println!("mode: {}", mode);
                 }
                 if mode == "devmode" {
-                    output_vec.push(format!("{}", package_name.to_string()));
+                    output_vec.push(Value::String(package_name.to_string()));
                 }
             }
         }
-        output_vec
+        Value::Sequence(output_vec)
     }
 }
