@@ -1,14 +1,23 @@
 pub use self::cli::run;
 
 mod cli {
+    //! CLI for rinstall
+    //! 
+    //! Provides for the following subcommands:
+    //! - `apply`: Apply a YAML file to the system
+    //! - `capture`: Capture the current state of the system
+    //! 
+
     use clap::{App, AppSettings, Arg, ArgMatches};
 
+    /// Runs the CLI
     pub fn run() -> ArgMatches {
 
         CLI::run()
 
     }
 
+    /// Struct for the CLI, allows transition to other frameworks in the future
     pub struct CLI {}
 
     impl CLI {
