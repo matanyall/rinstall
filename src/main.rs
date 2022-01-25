@@ -11,7 +11,7 @@ mod cli;
 fn main() {
     let matches = cli::run();
 
-    // static DRY_RUN: bool = matches.is_present("dry-run"); Do thomething with lazy_static
+    // static DRY_RUN: bool = matches.is_present("dry-run"); Do something with lazy_static
 
     match matches.subcommand() {
         Some(("apply", matches)) => {
@@ -33,6 +33,7 @@ fn main() {
     }
 }
 
+/// Load a YAML file into a vector of YAML objects
 fn load_file(file: &str) -> Vec<Yaml> {
     let mut file = File::open(file).expect("Unable to open file");
     let mut contents = String::new();
